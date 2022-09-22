@@ -1,0 +1,131 @@
+#include <fstream>
+ofstream fileout;
+
+fileOut.open("output.txt"); // Cria o arquivo e 
+
+
+fileOut << ".DATA" << endl;
+
+
+fileOut << ".CODE" << endl;
+
+switch(opcode) {
+    case :  // ADD
+        fileOut << "    mov EAX, " << OP1 << endl;  // EAX = memória de OP1
+        fileOut << "    add EAX, " << OP2 << endl;  // EAX = EAX + memória de OP2
+        fileOut << "    mov [acc], EAX" << endl;
+        fileOut << endl;
+        break;
+    case :  // SUB
+        fileOut << "    mov EAX, " << OP1 << endl;  // EAX = memória de OP1
+        fileOut << "    sub EAX, " << OP2 << endl;  // EAX = EAX - memória de OP2
+        fileOut << "    mov [acc], EAX" << endl;
+        fileOut << endl;
+        break;
+    case :  // MUL
+    // Primeiro deve verificar overflow. Se tiver, o programa deve parar.
+    // Como o sinal deve ser considerado, a operação de saída é "imul"
+        fileOut << "    mov EAX, " << OP1 << endl;  // Passa o primeiro parâmetro para o acumulador
+        fileOut << "    mov EBX, " << OP2 << endl;  // Passa o segundo parâmetro para BX
+        fileOut << "    imul EBX" << endl;  // Multiplica o conteúdo do acumulador EAX com o conteúdo de EBX e guarda no acumulador
+        fileOut << "    mov [acc], eax" << endl;
+        fileOut << endl;
+        break;
+    case :  // DIV
+        fileOut << "  mov EDX, 0" << endl;
+        fileOut << "  mov EBX, [" << tokenFound->second << "]" << endl;
+        fileOut << "  idiv EBX" << endl;
+        fileOut << "  mov [acc], eax" << endl;
+        fileOut << endl;
+        break;
+    case :  // JMP
+        fileOut << "  ; JMP " << tokenFound->second << endl;
+        fileOut << "  jmp " << tokenFound->second << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // JMPN
+        
+        fileOut << "  ; JMPN " << tokenFound->second << endl;
+        fileOut << "  cmp dword [acc], 0" << endl;
+        fileOut << "  jl " << tokenFound->second << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // JMPP
+        fileOut << "  ; JMPP " << tokenFound->second << endl;
+        fileOut << "  cmp dword [acc], 0" << endl;
+        fileOut << "  jg " << tokenFound->second << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // JMPZ
+        fileOut << "  ; JMPZ " << tokenFound->second << endl;
+        fileOut << "  cmp dword [acc], 0" << endl;
+        fileOut << "  je " << tokenFound->second << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // COPY
+        cond << endl;
+        fileOut << "  mov eax, [" << temp << "]" << endl;
+        fileOut << "  mov [" << tokenFound->second << "], eax" << endl;
+        fileOut << endl;
+        i += 2;
+        break;
+    case :  // LOAD
+        fileOut << "  mov eax, [" << tokenFound->second << "]" << endl;
+        fileOut << "  mov [acc], eax" << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // STORE
+        fileOut << "  ; STORE " << tokenFound->second << endl;
+        fileOut << "  mov eax, [acc]" << endl;
+        fileOut << "  mov [" << tokenFound->second << "], eax" << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // INPUT
+        fileOut << "  ; INPUT " << tokenFound->second << endl;
+        fileOut << "  push dword " << tokenFound->second << endl;
+        fileOut << "  push dword num_aux" << endl;
+        fileOut << "  call input_call" << endl;
+        fileOut << "  add esp, 8" << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // OUTPUT
+        fileOut << "  ; OUTPUT " << tokenFound->second << endl;
+        fileOut << "  push dword " << tokenFound->second << endl;
+        fileOut << "  push dword 13" << endl;
+        fileOut << "  call output_call" << endl;
+        fileOut << "  add esp, 8" << endl;
+        fileOut << endl;
+        i++;
+        break;
+    case :  // STOP
+        fileOut << "  ; STOP" << endl;
+        fileOut << "  mov eax, 1" << endl;
+        fileOut << "  mov ebx, 0" << endl;
+        fileOut << "  int 80h" << endl;
+        fileOut << endl;
+        isInSectionText = false;
+        break;
+    case :  // S_INPUT
+        fileOut << ", " << tokenFound->second << endl;
+        fileOut << "  push dword " << temp << endl;
+        fileOut << "  push dword [" << tokenFound->second << "]" << endl;
+        fileOut << "  call s_input_call" << endl;
+        fileOut << "  add esp, 8" << endl;
+        fileOut << endl;
+        break;
+    case :  // S_OUTPUT
+        fileOut << ", " << tokenFound->second << endl;
+        fileOut << "  push dword " << temp << endl;
+        fileOut << "  push dword [" << tokenFound->second << "]" << endl;
+        fileOut << "  call s_output_call" << endl;
+        fileOut << "  add esp, 8" << endl;
+        fileOut << endl;
+        break;
+}

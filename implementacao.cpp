@@ -19,7 +19,7 @@ void leitura(char* arquivo){
     ifstream ifile(arquivo);
     string line;
     int num;
-    bool ok;
+    bool ok1,ok2;
     vector<int> numbers;
     vector<int> vetores;
     vector<int> percorridos;
@@ -68,39 +68,68 @@ void leitura(char* arquivo){
     }
 
     for(int i = 0; i < table.size() ; i++){
+        ok1 = true;
+        ok2 = true;
+        if(table[i].op1 == -1) ok1 = false;
+        if(table[i].op2 == -1) ok2 = false;
+        for(int j = 0; j < percorridos.size(); j++){
+            //cout << i<<" : " << table[i].op2 <<endl;            
+           if(table[i].op1 == percorridos[j]) ok1 = false;  
+           if(table[i].op2 == percorridos[j]) ok2 = false;
+        }
+        if (ok1 == true){ 
+            //cout << i<<" : " << table[i].op1 <<endl;
+            percorridos.push_back(table[i].op1);
+        }
+        if (ok2 == true){ 
+            //cout << i<<" : " << table[i].op2 <<endl;
+            percorridos.push_back(table[i].op2);
+        }       
+    }
+
+    
+
+    for(int i = 0; i < table.size() ; i++){ // CONFERE SE TEM VETORES A SEREM DECLARADOS NO .DATA
         if(table[i].opcode == 15 || table[i].opcode == 16){
             vetores.push_back(table[i].op1);
-            vetores.push_back(table[i].op2);
-
-            cout<<"VETOR AQUI COMECO: "<< numbers[table[i].op1] <<" final: "<<  numbers[table[i].op1 + table[i].op2 -1] <<endl;
         }
     }
 
-    for(int i = 0; i <vetores.size();i++){
-        percorridos.push_back(vetores[i]);
-        i++;
-        while(vetores[i]>0){
-            vetores[i]--;
-            percorridos.push_back(vetores[(i-1)]+vetores[i]);
-            
-        }
 
-    }
+    
+    bool vetor = false;
     for(int i = variables_begin; i < numbers.size(); i++){
-        ok = true;
-        for(int j=0; j < percorridos.size();j++){
-            if(i == percorridos [j]){
-                ok = false;
-                break;
-            } 
+        if(vetor == true){
+            //cout<<"aki"<<endl;
+            for(int k = 0; k < percorridos.size();k++){
+                if(i == percorridos[k]) {
+                    
+                    //cout<<"  "<< k << "  "<< percorridos[k]<< "  "<<endl;
+                    cout << ";" <<endl;
+                    vetor = false;
+                    //cout<<"vetor"<<vetor<<endl; 
+                    break;
+                }
+            }
+            if (vetor == true) cout << "," << numbers[i];
+        }    
+        if(vetor == false){
+            for(int j=0; j < vetores.size();j++){
+                if (i == vetores[j]){  
+                vetor = true;
+                //cout<<"vetor"<<vetor<<endl; 
+                cout << "VETOR : " << numbers[i];
+                } 
+            }
+            //cout<<numbers[i]<<endl; 
+            if(vetor == false){           
+                if(numbers[i] == 0)
+                        cout << "variavel sem valor definido"<< endl;
+                else cout << "constante" << endl;;    
+            }
         }
-        if(ok == true){
-            if (numbers[i] == 0)
-                cout << "variavel sem valor definido"<< endl;
-            else cout << "constante" << endl;;    
-        }
+    }    
 
-    }
 
 
 
@@ -112,14 +141,25 @@ void leitura(char* arquivo){
     cout<< endl;
 
 
+    for(int i = 0; i < vetores.size() ; i++){
+        cout << vetores[i] << " ";
+    }
+    cout<< endl;
+
+
+    for(int i = 0; i < percorridos.size() ; i++){
+        cout << percorridos[i] << " ";
+    }
+    cout<< endl;
+
     
-    // for(int i = 0; i < table.size() ; i++){
-    //     cout << "OPCODE = " << table[i].opcode << endl;
-    //     if(table[i].op1 != -1)
-    //     cout << "OP1 = " << table[i].op1 << endl;
-    //     if(table[i].op2 != -1)
-    //     cout << "OP2 = " << table[i].op2 << endl;
-    // }
+    for(int i = 0; i < table.size() ; i++){
+        cout << "OPCODE = " << table[i].opcode << endl;
+        if(table[i].op1 != -1)
+        cout << "OP1 = " << table[i].op1 << endl;
+        if(table[i].op2 != -1)
+        cout << "OP2 = " << table[i].op2 << endl;
+    }
 
 
 
