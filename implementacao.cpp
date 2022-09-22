@@ -5,7 +5,7 @@
 
 
 using namespace std;
-
+// 12 29 10 29 4 28 11 30 3 28 11 31 10 29 2 31 11 31 13 31 9 30 29 10 29 7 4 15 35 38 14 2 0 0 0 23 24 25 0
 
 typedef struct gramatica{
 
@@ -237,6 +237,219 @@ void leitura(char* arquivo){
         }
 
     }
+
+    fileout <<endl;
+    fileout << "section .text" << endl << endl;
+    fileout << "global _start:" << endl << endl;
+    fileout << "_start:" << endl;
+
+    for(int i = 0; i < table.size() ; i++){
+        string label_op1, label_op2;
+
+        for(int j = 0; j < tipo_dados.size() ; j++){
+            if(tipo_dados[j].posicao == table[i].op1)
+                label_op1 = tipo_dados[j].label;
+            if(tipo_dados[j].posicao == table[i].op2)    
+                label_op2 = tipo_dados[j].label;
+            
+
+        }
+
+
+
+        switch(table[i].opcode) {
+        case 1:  // ADD
+            fileout << "    mov EAX, " << label_op1 << endl;  // EAX = dado de OP
+            fileout << "    add [ACC], EAX" << endl;  // ACC = ACC + OP
+            fileout << endl;
+            i++;
+            break;
+        case 2:  // SUB
+            fileout << "    mov EAX, " << label_op1 << endl;  // EAX = dado de OP
+            fileout << "    sub [ACC], EAX" << endl;  // ACC = ACC - OP
+            fileout << endl;
+            i++;
+            break;
+        case 3:  // MUL
+        // Primeiro deve verificar overflow. Se tiver, o programa deve parar.
+        // Como o sinal deve ser considerado, a operação de saída é "imul"
+
+        // MULT X ; 
+            fileout << "    mov EAX, [ACC]" << endl;   // Passa o ACC para EAX
+            fileout << "    mov EBX, " << label_op1 << endl; // EBX = Dado de OP
+            fileout << "    imul EBX" << endl;         // EBX=ACC*OP
+            fileout << "    jo overflow" << endl;              // Pula para a função que verifica overflow
+            fileout << "    mov [ACC], eax" << endl;   // ACC=ACC*OP, como no assembly inventado
+            fileout << endl;
+            i++;
+            break;
+        case 4:  // DIV
+        /* EXEMPLO
+        .DATA
+        dword_val SDWORD -50000
+        .CODE
+        mov eax, dword_val ; dividend, low
+        cdq                ; sign-extend EAX into EDX
+        mov ebx, 256       ; divisor
+        idiv ebx           ; quotient EAX = -195, remainder EDX = -80
+        */
+            fileout << "    mov EAX, [ACC]"<< endl;     // EAX recebe ACC
+            fileout << "    cdq" << endl;               // Extensão de sinal
+            fileout << "    mov EBX, OP1" << endl;      // EBX recebe OP
+            fileout << "    idiv EBX" << endl;          // EBX = ACC/OP
+            fileout << "    mov [ACC], EBX" << endl;    // ACC = ACC/OP, como no assembly inventado
+            fileout << endl;
+            i++;
+            break;
+        case 5:  // JMP
+            fileout << "    jmp " << label_op1 << endl << endl;  // Jump para o rótulo que tem o endereço OP
+            i++;
+            break;
+        case 6:  // JMPN
+            fileout << "    cmp dword [ACC], 0" << endl;
+            fileout << "    jl " << label_op1 << endl << endl; // Jump para o rótulo que tem o endereço OP, se ACC < 0
+            i++;
+            break;
+        case 7:  // JMPP
+            fileout << "    cmp dword [ACC], 0" << endl; 
+            fileout << "    jg " << label_op1 << endl << endl; // Jump para o rótulo que tem o endereço OP, se ACC > 0
+            i++;
+            break;
+        case 8:  // JMPZ
+            fileout << "    cmp dword [ACC], 0" << endl;
+            fileout << "    je " << label_op1 << endl << endl; // Jump para o rótulo que tem o endereço OP,  se ACC = 0
+            i++;
+            break;
+        case 9:  // COPY
+            fileout << "    mov EAX, [" << label_op1 << "]" << endl;          // EAX = mem(OP1)
+            fileout << "    mov [" << label_op2 << "], eax" << endl << endl;  // mem(OP2) = EAX
+            i += 2;
+            break;
+        case 10:  // LOAD
+            fileout << "    mov [ACC], "<< label_op1 << endl << endl; // ACC = dado no endereço OP
+            i++;
+            break;
+        case 11:  // STORE
+            fileout << "    mov "<< label_op1 << ", [ACC]" << endl << endl; // endereço OP recebe ACC
+            i++;
+            break;
+
+    
+        case 12:  // INPUT mem(OP) = entrada
+            fileout << "    push dword " << label_op1 << endl;
+            fileout << "    push dword num_aux" << endl;
+            fileout << "    call input_call" << endl;
+            fileout << "    add esp, 8" << endl << endl;
+            i++;
+            break;
+        case 13:  // OUTPUT saída = mem(OP)
+            fileout << "  ; OUTPUT " << label_op1 << endl;
+            fileout << "    push dword " << label_op1 << endl;
+            fileout << "    push dword 13" << endl;
+            fileout << "    call output_call" << endl;
+            fileout << "    add esp, 8" << endl << endl;
+            i++;
+            break;
+        case 14:  // STOP
+            fileout << "    ;STOP" << endl;
+            fileout << "    mov EAX, 1" << endl;
+            fileout << "    mov EBX, 0" << endl;
+            fileout << "    int 80h" << endl << endl;
+            break;
+        case 15:  // S_INPUT
+            fileout << ", " << /*tokenFound->second <<*/ endl;
+            fileout << "  push dword " << /*temp <<*/ endl;
+            fileout << "  push dword [" << /*tokenFound->second<< */"]" << endl;
+            fileout << "  call s_input_call" << endl;
+            fileout << "  add esp, 8" << endl << endl;
+            break;
+        case 16:  // S_OUTPUT
+            fileout << ", " << /*tokenFound->second <<*/ endl;
+            fileout << "  push dword " /*<< temp*/ << endl;
+            fileout << "  push dword [" << /*tokenFound->second <<*/ "]" << endl;
+            fileout << "  call s_output_call" << endl;
+            fileout << "  add esp, 8" << endl << endl;
+            break;
+    
+
+        }
+    }    
+
+
+
+/*
+  fileout << "output_call:" << endl;
+  fileout << "  push ebp" << endl;
+  fileout << "  mov ebp, esp" << endl;
+  fileout << "  mov eax, 4" << endl;
+  fileout << "  mov ebx, 1" << endl;
+  fileout << "  mov ecx, [ebp + 12]" << endl;
+  fileout << "  mov edx, [ebp + 8]" << endl;
+  fileout << "  int 80h" << endl;
+  fileout << "  pop ebp" << endl;
+  fileout << "  ret" << endl;
+  fileout << endl;
+
+  fileout << "input_call:" << endl;
+  fileout << "  push ebp" << endl;
+  fileout << "  mov ebp, esp" << endl;
+  fileout << "  mov eax, 3" << endl;
+  fileout << "  mov ebx, 0" << endl;
+  fileout << "  mov ecx, [ebp + 8]" << endl;
+  fileout << "  mov edx, 13" << endl;
+  fileout << "  int 80h" << endl;
+  fileout << "  mov ebx, dword [ebp + 12]" << endl;
+  fileout << "  mov ebp, 0" << endl;
+  fileout << "  mov edx, 10" << endl;
+  fileout << " input_loop:" << endl;
+  fileout << "  cmp byte [ecx], 10" << endl;
+  fileout << "  je bye_input" << endl;
+  fileout << "  mov eax, ebp" << endl;
+  fileout << "  imul edx" << endl;
+  fileout << "  mov ebp, eax" << endl;
+  fileout << "  mov edx, [ecx]" << endl;
+  fileout << "  and edx, 255" << endl;
+  fileout << "  add ebp, edx" << endl;
+  fileout << "  mov edx, 10" << endl;
+  fileout << "  sub ebp, 48" << endl;
+  fileout << "  add ecx, 1" << endl;
+  fileout << "  jmp input_loop" << endl;
+  fileout << " bye_input:" << endl;
+  fileout << "  mov dword [ebx], ebp" << endl;
+  fileout << "  pop ebp" << endl;
+  fileout << "  ret" << endl;
+  fileout << endl;
+
+  fileout << "s_output_call:" << endl;
+  fileout << "  push ebp" << endl;
+  fileout << "  mov ebp, esp" << endl;
+  fileout << "  mov eax, 4" << endl;
+  fileout << "  mov ebx, 1" << endl;
+  fileout << "  mov ecx, [ebp + 12]" << endl;
+  fileout << "  mov edx, [ebp + 8]" << endl;
+  fileout << "  int 80h" << endl;
+  fileout << "  pop ebp" << endl;
+  fileout << "  ret" << endl;
+  fileout << endl;
+  fileout << "s_input_call:" << endl;
+  fileout << "  push ebp" << endl;
+  fileout << "  mov ebp, esp" << endl;
+  fileout << "  mov eax, 3" << endl;
+  fileout << "  mov ebx, 0" << endl;
+  fileout << "  mov ecx, [ebp + 12]" << endl;
+  fileout << "  mov edx, [ebp + 8]" << endl;
+  fileout << "  int 80h" << endl;
+  fileout << "  pop ebp" << endl;
+  fileout << "  ret" << endl;
+
+  fileout.close();
+*/
+
+
+
+
+
+
 
 
 
