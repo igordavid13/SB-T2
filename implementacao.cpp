@@ -15,8 +15,18 @@ int op2;
 
 }gramatica;
 
+typedef struct dados{
+
+string label;
+int posicao;
+int tipo;
+vector<int> valor;
+}dados;
+
+
 void leitura(char* arquivo){
     ifstream ifile(arquivo);
+    ofstream fileout;
     string line;
     int num;
     bool ok1,ok2;
@@ -25,6 +35,8 @@ void leitura(char* arquivo){
     vector<int> percorridos;
     vector<gramatica> table;
     gramatica exemple;
+    vector<dados> tipo_dados;
+    dados exemple_dados;
     int variables_begin;
     
     
@@ -95,7 +107,6 @@ void leitura(char* arquivo){
         }
     }
 
-
     
     bool vetor = false;
     for(int i = variables_begin; i < numbers.size(); i++){
@@ -105,27 +116,46 @@ void leitura(char* arquivo){
                 if(i == percorridos[k]) {
                     
                     //cout<<"  "<< k << "  "<< percorridos[k]<< "  "<<endl;
-                    cout << ";" <<endl;
+                    tipo_dados.push_back(exemple_dados);
+                    exemple_dados = {};
                     vetor = false;
                     //cout<<"vetor"<<vetor<<endl; 
                     break;
                 }
             }
-            if (vetor == true) cout << "," << numbers[i];
+            if (vetor == true) exemple_dados.valor.push_back(numbers[i]);;
         }    
         if(vetor == false){
             for(int j=0; j < vetores.size();j++){
                 if (i == vetores[j]){  
-                vetor = true;
-                //cout<<"vetor"<<vetor<<endl; 
+                vetor = true;                
+                exemple_dados.posicao = i;
+                exemple_dados.label = "label_" + to_string(tipo_dados.size());
+                exemple_dados.tipo = 2;
+                exemple_dados.valor.push_back(numbers[i]);    
                 cout << "VETOR : " << numbers[i];
                 } 
             }
             //cout<<numbers[i]<<endl; 
             if(vetor == false){           
-                if(numbers[i] == 0)
-                        cout << "variavel sem valor definido"<< endl;
-                else cout << "constante" << endl;;    
+                if(numbers[i] == 0){
+                    exemple_dados.posicao = i;
+                    exemple_dados.label = "label_" + to_string(tipo_dados.size());
+                    exemple_dados.tipo = 0;
+                    exemple_dados.valor.push_back(numbers[i]);
+                    tipo_dados.push_back(exemple_dados);
+                    exemple_dados = {};
+                    cout << "variavel sem valor definido"<< endl;
+                }    
+                else{
+                    exemple_dados.posicao = i;
+                    exemple_dados.label = "label_" + to_string(tipo_dados.size());
+                    exemple_dados.tipo = 1;
+                    exemple_dados.valor.push_back(numbers[i]);
+                    tipo_dados.push_back(exemple_dados);  
+                    exemple_dados = {};                   
+                    cout << "constante" << endl;
+                }   
             }
         }
     }    
@@ -153,14 +183,64 @@ void leitura(char* arquivo){
     cout<< endl;
 
     
-    for(int i = 0; i < table.size() ; i++){
-        cout << "OPCODE = " << table[i].opcode << endl;
-        if(table[i].op1 != -1)
-        cout << "OP1 = " << table[i].op1 << endl;
-        if(table[i].op2 != -1)
-        cout << "OP2 = " << table[i].op2 << endl;
+    // for(int i = 0; i < table.size() ; i++){
+    //     cout << "OPCODE = " << table[i].opcode << endl;
+    //     if(table[i].op1 != -1)
+    //     cout << "OP1 = " << table[i].op1 << endl;
+    //     if(table[i].op2 != -1)
+    //     cout << "OP2 = " << table[i].op2 << endl;
+    // }
+
+    for(int i = 0; i < tipo_dados.size() ; i++){
+        cout << "label = " << tipo_dados[i].label << endl;
+        cout << "posicao = " << tipo_dados[i].posicao << endl;
+        cout << "tipo = " << tipo_dados[i].tipo << endl;
+        for(int j=0; j<(tipo_dados[i].valor).size();j++){
+        cout << "valor = " << tipo_dados[i].valor[j] << endl;
+        }
+        cout<<endl;
     }
 
+
+
+
+    fileout.open("output.txt"); 
+
+    fileout << "section .data" << endl << endl;
+
+    for(int i = 0; i < tipo_dados.size() ; i++){
+        if(tipo_dados[i].tipo == 1){
+            fileout << tipo_dados[i].label;
+            fileout << " dd "; 
+            fileout << tipo_dados[i].valor[0];
+            fileout << endl;
+        }
+        if(tipo_dados[i].tipo == 2){
+            fileout << tipo_dados[i].label; 
+            fileout << " dd "; 
+            for(int j = 0; j < tipo_dados[i].valor.size(); j++){ 
+                fileout << (tipo_dados[i].valor[j]);
+                if(j+1 != tipo_dados[i].valor.size())
+                fileout << ", ";
+            }
+            fileout << ";" <<endl;
+        }
+    }
+
+    fileout <<endl;
+    fileout << "section .bss" << endl << endl;
+
+    for(int i = 0; i < tipo_dados.size() ; i++){
+        if(tipo_dados[i].tipo == 0){
+            fileout << tipo_dados[i].label; 
+            fileout << " resd 1;" << endl; 
+        }
+
+    }
+
+
+
+    fileout.close();
 
 
 

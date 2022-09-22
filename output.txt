@@ -1,0 +1,11 @@
+section .data
+
+label_0 dd 2
+label_4 dd 23, 24, 25;
+
+section .bss
+
+label_1 resd 1;
+label_2 resd 1;
+label_3 resd 1;
+label_5 resd 1;
