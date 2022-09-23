@@ -133,7 +133,7 @@ void leitura(char* arquivo){
                 exemple_dados.label = "label_" + to_string(tipo_dados.size());
                 exemple_dados.tipo = 2;
                 exemple_dados.valor.push_back(numbers[i]);    
-                cout << "VETOR : " << numbers[i];
+                //cout << "VETOR : " << numbers[i];
                 } 
             }
             //cout<<numbers[i]<<endl; 
@@ -145,7 +145,7 @@ void leitura(char* arquivo){
                     exemple_dados.valor.push_back(numbers[i]);
                     tipo_dados.push_back(exemple_dados);
                     exemple_dados = {};
-                    cout << "variavel sem valor definido"<< endl;
+                    //cout << "variavel sem valor definido"<< endl;
                 }    
                 else{
                     exemple_dados.posicao = i;
@@ -154,7 +154,7 @@ void leitura(char* arquivo){
                     exemple_dados.valor.push_back(numbers[i]);
                     tipo_dados.push_back(exemple_dados);  
                     exemple_dados = {};                   
-                    cout << "constante" << endl;
+                    //cout << "constante" << endl;
                 }   
             }
         }
@@ -165,22 +165,22 @@ void leitura(char* arquivo){
 
 
 
-    for(int i = 0; i < numbers.size() ; i++){
-        cout << numbers[i] << " ";
-    }
-    cout<< endl;
+    // for(int i = 0; i < numbers.size() ; i++){
+    //     cout << numbers[i] << " ";
+    // }
+    // cout<< endl;
 
 
-    for(int i = 0; i < vetores.size() ; i++){
-        cout << vetores[i] << " ";
-    }
-    cout<< endl;
+    // for(int i = 0; i < vetores.size() ; i++){
+    //     cout << vetores[i] << " ";
+    // }
+    // cout<< endl;
 
 
-    for(int i = 0; i < percorridos.size() ; i++){
-        cout << percorridos[i] << " ";
-    }
-    cout<< endl;
+    // for(int i = 0; i < percorridos.size() ; i++){
+    //     cout << percorridos[i] << " ";
+    // }
+    // cout<< endl;
 
     
     // for(int i = 0; i < table.size() ; i++){
@@ -191,22 +191,68 @@ void leitura(char* arquivo){
     //     cout << "OP2 = " << table[i].op2 << endl;
     // }
 
-    for(int i = 0; i < tipo_dados.size() ; i++){
-        cout << "label = " << tipo_dados[i].label << endl;
-        cout << "posicao = " << tipo_dados[i].posicao << endl;
-        cout << "tipo = " << tipo_dados[i].tipo << endl;
-        for(int j=0; j<(tipo_dados[i].valor).size();j++){
-        cout << "valor = " << tipo_dados[i].valor[j] << endl;
-        }
-        cout<<endl;
-    }
+    // for(int i = 0; i < tipo_dados.size() ; i++){
+    //     cout << "label = " << tipo_dados[i].label << endl;
+    //     cout << "posicao = " << tipo_dados[i].posicao << endl;
+    //     cout << "tipo = " << tipo_dados[i].tipo << endl;
+    //     for(int j=0; j<(tipo_dados[i].valor).size();j++){
+    //     cout << "valor = " << tipo_dados[i].valor[j] << endl;
+    //     }
+    //     cout<<endl;
+    // }
 
 
 
 
-    fileout.open("output.txt"); 
+    fileout.open("output.txt");
+
+    fileout << "ok_overflow:" << endl;
+    fileout << "  push dword msg"  << endl;
+    fileout << "  push dword [msg_size]" << endl;
+    fileout << "  call s_output_call" << endl;
+    fileout << "  add esp, 8" << endl;
+    fileout << "  mov EAX, 1" << endl;
+    fileout << "  mov EBX, 0" << endl;
+    fileout << "  int 80h" << endl << endl;
+    fileout << endl;
+
+    fileout << "s_input:" << endl;
+    fileout << "  push ebp" << endl;
+    fileout << "  mov ebp, esp" << endl;
+    fileout << "  mov eax, 3" << endl;
+    fileout << "  mov ebx, 0" << endl;
+    fileout << "  mov ecx, [ebp + 12]" << endl;
+    fileout << "  mov edx, [ebp + 8]" << endl;
+    fileout << "  int 80h" << endl;
+    fileout << "  pop ebp" << endl;
+    fileout << "  ret" << endl;
+
+    fileout << "s_output:" << endl;
+    fileout << "  push ebp" << endl;
+    fileout << "  mov ebp, esp" << endl;
+    fileout << "  mov eax, 4" << endl;
+    fileout << "  mov ebx, 1" << endl;
+    fileout << "  mov ecx, [ebp + 12]" << endl;
+    fileout << "  mov edx, [ebp + 8]" << endl;
+    fileout << "  int 80h" << endl;
+    fileout << "  pop ebp" << endl;
+    fileout << "  ret" << endl;
+    fileout << endl;
+
+
+    fileout << "output:" << endl;
+    /*Implementar*/
+    fileout << endl;
+
+    fileout << "input:" << endl;
+    /*Implementar*/
+    fileout << endl;
 
     fileout << "section .data" << endl << endl;
+
+    fileout << "msg db 'DEU OVERFLOW,OdH,0aH'" << endl;
+    fileout << "msg_size EQU $-msg" << endl;
+
 
     for(int i = 0; i < tipo_dados.size() ; i++){
         if(tipo_dados[i].tipo == 1){
@@ -233,7 +279,7 @@ void leitura(char* arquivo){
     for(int i = 0; i < tipo_dados.size() ; i++){
         if(tipo_dados[i].tipo == 0){
             fileout << tipo_dados[i].label; 
-            fileout << " resd 1;" << endl; 
+            fileout << " resd 1" << endl; 
         }
 
     }
@@ -259,14 +305,14 @@ void leitura(char* arquivo){
 
         switch(table[i].opcode) {
         case 1:  // ADD
-            fileout << "    mov EAX, " << label_op1 << endl;  // EAX = dado de OP
-            fileout << "    add [ACC], EAX" << endl;  // ACC = ACC + OP
+            fileout << "    mov EBX, [" << label_op1 << "]"<< endl; 
+            fileout << "    add [EAX], EBX" << endl;  
             fileout << endl;
             i++;
             break;
         case 2:  // SUB
-            fileout << "    mov EAX, " << label_op1 << endl;  // EAX = dado de OP
-            fileout << "    sub [ACC], EAX" << endl;  // ACC = ACC - OP
+            fileout << "    mov EBX, [" << label_op1 << "]" << endl;  
+            fileout << "    sub [EAX], EBX" << endl;  
             fileout << endl;
             i++;
             break;
@@ -274,13 +320,11 @@ void leitura(char* arquivo){
         // Primeiro deve verificar overflow. Se tiver, o programa deve parar.
         // Como o sinal deve ser considerado, a operação de saída é "imul"
 
+
         // MULT X ; 
-            fileout << "    mov EAX, [ACC]" << endl;   // Passa o ACC para EAX
-            fileout << "    mov EBX, " << label_op1 << endl; // EBX = Dado de OP
-            fileout << "    imul EBX" << endl;         // EBX=ACC*OP
-            fileout << "    jo overflow" << endl;              // Pula para a função que verifica overflow
-            fileout << "    mov [ACC], eax" << endl;   // ACC=ACC*OP, como no assembly inventado
-            fileout << endl;
+            fileout << "    mov EBX, [" << label_op1 <<"]" << endl; // EBX = Dado de OP
+            fileout << "    imul dword EBX" << endl;         
+            fileout << "    jo ok_overflow" << endl;              // Pula para a função que verifica overflow
             i++;
             break;
         case 4:  // DIV
@@ -293,44 +337,41 @@ void leitura(char* arquivo){
         mov ebx, 256       ; divisor
         idiv ebx           ; quotient EAX = -195, remainder EDX = -80
         */
-            fileout << "    mov EAX, [ACC]"<< endl;     // EAX recebe ACC
             fileout << "    cdq" << endl;               // Extensão de sinal
-            fileout << "    mov EBX, OP1" << endl;      // EBX recebe OP
+            fileout << "    mov EBX, [" << label_op1 <<"]" << endl;      // EBX recebe OP1
             fileout << "    idiv EBX" << endl;          // EBX = ACC/OP
-            fileout << "    mov [ACC], EBX" << endl;    // ACC = ACC/OP, como no assembly inventado
-            fileout << endl;
             i++;
             break;
         case 5:  // JMP
-            fileout << "    jmp " << label_op1 << endl << endl;  // Jump para o rótulo que tem o endereço OP
+            fileout << "    jmp " << label_op1 << endl ;  // Jump para o rótulo que tem o endereço OP
             i++;
             break;
         case 6:  // JMPN
-            fileout << "    cmp dword [ACC], 0" << endl;
+            fileout << "    cmp dword [EAX], 0" << endl;
             fileout << "    jl " << label_op1 << endl << endl; // Jump para o rótulo que tem o endereço OP, se ACC < 0
             i++;
             break;
         case 7:  // JMPP
-            fileout << "    cmp dword [ACC], 0" << endl; 
+            fileout << "    cmp dword [EAX], 0" << endl; 
             fileout << "    jg " << label_op1 << endl << endl; // Jump para o rótulo que tem o endereço OP, se ACC > 0
             i++;
             break;
         case 8:  // JMPZ
-            fileout << "    cmp dword [ACC], 0" << endl;
+            fileout << "    cmp dword [EAX], 0" << endl;
             fileout << "    je " << label_op1 << endl << endl; // Jump para o rótulo que tem o endereço OP,  se ACC = 0
             i++;
             break;
         case 9:  // COPY
-            fileout << "    mov EAX, [" << label_op1 << "]" << endl;          // EAX = mem(OP1)
-            fileout << "    mov [" << label_op2 << "], eax" << endl << endl;  // mem(OP2) = EAX
+            fileout << "    mov EBX, [" << label_op1 << "]" << endl;          // EBX = mem(OP1)
+            fileout << "    mov [" << label_op2 << "], EBX" << endl;  // mem(OP2) = EBX
             i += 2;
             break;
         case 10:  // LOAD
-            fileout << "    mov [ACC], "<< label_op1 << endl << endl; // ACC = dado no endereço OP
+            fileout << "    mov [EAX], "<< label_op1 << endl; // ACC = dado no endereço OP
             i++;
             break;
         case 11:  // STORE
-            fileout << "    mov "<< label_op1 << ", [ACC]" << endl << endl; // endereço OP recebe ACC
+            fileout << "    mov "<< label_op1 << ", [EAX]" << endl; // endereço OP recebe ACC
             i++;
             break;
 
@@ -338,120 +379,44 @@ void leitura(char* arquivo){
         case 12:  // INPUT mem(OP) = entrada
             fileout << "    push dword " << label_op1 << endl;
             fileout << "    push dword num_aux" << endl;
-            fileout << "    call input_call" << endl;
-            fileout << "    add esp, 8" << endl << endl;
+            fileout << "    call input" << endl;
+            fileout << "    add esp, 8" << endl;
             i++;
             break;
         case 13:  // OUTPUT saída = mem(OP)
             fileout << "  ; OUTPUT " << label_op1 << endl;
             fileout << "    push dword " << label_op1 << endl;
             fileout << "    push dword 13" << endl;
-            fileout << "    call output_call" << endl;
-            fileout << "    add esp, 8" << endl << endl;
+            fileout << "    call output" << endl;
+            fileout << "    add esp, 8" << endl;
             i++;
             break;
         case 14:  // STOP
-            fileout << "    ;STOP" << endl;
             fileout << "    mov EAX, 1" << endl;
             fileout << "    mov EBX, 0" << endl;
-            fileout << "    int 80h" << endl << endl;
+            fileout << "    int 80h" << endl;
             break;
         case 15:  // S_INPUT
-            fileout << ", " << /*tokenFound->second <<*/ endl;
-            fileout << "  push dword " << /*temp <<*/ endl;
-            fileout << "  push dword [" << /*tokenFound->second<< */"]" << endl;
-            fileout << "  call s_input_call" << endl;
-            fileout << "  add esp, 8" << endl << endl;
+            fileout << "  push dword " << label_op1 << endl;
+            fileout << "  push dword [" << label_op2 << "]" << endl;
+            fileout << "  call s_input" << endl;
+            fileout << "  add esp, 8" << endl;
+            fileout << endl;
+
             break;
         case 16:  // S_OUTPUT
-            fileout << ", " << /*tokenFound->second <<*/ endl;
-            fileout << "  push dword " /*<< temp*/ << endl;
-            fileout << "  push dword [" << /*tokenFound->second <<*/ "]" << endl;
-            fileout << "  call s_output_call" << endl;
-            fileout << "  add esp, 8" << endl << endl;
+            fileout << "  push dword " << label_op1 << endl;
+            fileout << "  push dword [" << label_op2 << "]" << endl;
+            fileout << "  call s_output" << endl;
+            fileout << "  add esp, 8" << endl;
+            fileout << endl;
+
+
             break;
     
 
         }
     }    
-
-
-
-/*
-  fileout << "output_call:" << endl;
-  fileout << "  push ebp" << endl;
-  fileout << "  mov ebp, esp" << endl;
-  fileout << "  mov eax, 4" << endl;
-  fileout << "  mov ebx, 1" << endl;
-  fileout << "  mov ecx, [ebp + 12]" << endl;
-  fileout << "  mov edx, [ebp + 8]" << endl;
-  fileout << "  int 80h" << endl;
-  fileout << "  pop ebp" << endl;
-  fileout << "  ret" << endl;
-  fileout << endl;
-
-  fileout << "input_call:" << endl;
-  fileout << "  push ebp" << endl;
-  fileout << "  mov ebp, esp" << endl;
-  fileout << "  mov eax, 3" << endl;
-  fileout << "  mov ebx, 0" << endl;
-  fileout << "  mov ecx, [ebp + 8]" << endl;
-  fileout << "  mov edx, 13" << endl;
-  fileout << "  int 80h" << endl;
-  fileout << "  mov ebx, dword [ebp + 12]" << endl;
-  fileout << "  mov ebp, 0" << endl;
-  fileout << "  mov edx, 10" << endl;
-  fileout << " input_loop:" << endl;
-  fileout << "  cmp byte [ecx], 10" << endl;
-  fileout << "  je bye_input" << endl;
-  fileout << "  mov eax, ebp" << endl;
-  fileout << "  imul edx" << endl;
-  fileout << "  mov ebp, eax" << endl;
-  fileout << "  mov edx, [ecx]" << endl;
-  fileout << "  and edx, 255" << endl;
-  fileout << "  add ebp, edx" << endl;
-  fileout << "  mov edx, 10" << endl;
-  fileout << "  sub ebp, 48" << endl;
-  fileout << "  add ecx, 1" << endl;
-  fileout << "  jmp input_loop" << endl;
-  fileout << " bye_input:" << endl;
-  fileout << "  mov dword [ebx], ebp" << endl;
-  fileout << "  pop ebp" << endl;
-  fileout << "  ret" << endl;
-  fileout << endl;
-
-  fileout << "s_output_call:" << endl;
-  fileout << "  push ebp" << endl;
-  fileout << "  mov ebp, esp" << endl;
-  fileout << "  mov eax, 4" << endl;
-  fileout << "  mov ebx, 1" << endl;
-  fileout << "  mov ecx, [ebp + 12]" << endl;
-  fileout << "  mov edx, [ebp + 8]" << endl;
-  fileout << "  int 80h" << endl;
-  fileout << "  pop ebp" << endl;
-  fileout << "  ret" << endl;
-  fileout << endl;
-  fileout << "s_input_call:" << endl;
-  fileout << "  push ebp" << endl;
-  fileout << "  mov ebp, esp" << endl;
-  fileout << "  mov eax, 3" << endl;
-  fileout << "  mov ebx, 0" << endl;
-  fileout << "  mov ecx, [ebp + 12]" << endl;
-  fileout << "  mov edx, [ebp + 8]" << endl;
-  fileout << "  int 80h" << endl;
-  fileout << "  pop ebp" << endl;
-  fileout << "  ret" << endl;
-
-  fileout.close();
-*/
-
-
-
-
-
-
-
-
 
     fileout.close();
 

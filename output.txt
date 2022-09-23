@@ -1,12 +1,49 @@
+ok_overflow:
+  push dword msg
+  push dword [msg_size]
+  call s_output_call
+  add esp, 8
+  mov EAX, 1
+  mov EBX, 0
+  int 80h
+
+
+s_input:
+  push ebp
+  mov ebp, esp
+  mov eax, 3
+  mov ebx, 0
+  mov ecx, [ebp + 12]
+  mov edx, [ebp + 8]
+  int 80h
+  pop ebp
+  ret
+s_output:
+  push ebp
+  mov ebp, esp
+  mov eax, 4
+  mov ebx, 1
+  mov ecx, [ebp + 12]
+  mov edx, [ebp + 8]
+  int 80h
+  pop ebp
+  ret
+
+output:
+
+input:
+
 section .data
 
+msg db 'DEU OVERFLOW,OdH,0aH'
+msg_size EQU $-msg
 label_0 dd 2
 
 section .bss
 
-label_1 resd 1;
-label_2 resd 1;
-label_3 resd 1;
+label_1 resd 1
+label_2 resd 1
+label_3 resd 1
 
 section .text
 
@@ -15,30 +52,18 @@ global _start:
 _start:
     push dword label_1
     push dword num_aux
-    call input_call
+    call input
     add esp, 8
-
-    mov EAX, [ACC]
     cdq
-    mov EBX, OP1
+    mov EBX, [label_0]
     idiv EBX
-    mov [ACC], EBX
-
-    mov EAX, [ACC]
-    mov EBX, label_0
-    imul EBX
-    jo overflow
-    mov [ACC], eax
-
-    mov [ACC], label_1
-
-    mov label_3, [ACC]
-
-    mov EAX, [label_2]
-    mov [label_1], eax
-
-    ;STOP
+    mov EBX, [label_0]
+    imul dword EBX
+    jo ok_overflow
+    mov [EAX], label_1
+    mov label_3, [EAX]
+    mov EBX, [label_2]
+    mov [label_1], EBX
     mov EAX, 1
     mov EBX, 0
     int 80h
-
